@@ -12,6 +12,13 @@ class TestMathUtils(unittest.TestCase):
 		except ValueError():
 			print("failed")
 
+	@unittest.skip()
+	def test_rad_log(self):
+		rcd = drive_track.RacecarDrive()
+		print(rcd.rad_log_growth(0, 10))
+
+		print(rcd.rad_log_decay(0, 10))
+
 if __name__ == "__main__":
 	unittest.main()
 

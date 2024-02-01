@@ -45,7 +45,6 @@ class RacecarDrive:
 
 	def rad_log_growth(self, bounds_min, bounds_max):
 		arr = [bounds_min]
-		i = 0
 		while self.mutils.modified_log(arr[-1]) < bounds_max:
 			arr.append(self.mutils.modified_log(arr[-1]))
 		return arr
@@ -54,27 +53,21 @@ class RacecarDrive:
 		arr = [bounds_max]
 		while self.mutils.modified_log(arr[-1]) > bounds_min:
 			arr.append(self.mutils.modified_log(arr[-1]))
+		return arr
 
 	def start(self):
 		self.car.drive.set_max_speed(1)
 		self.car.drive.stop() # begin at a standstill
 
-	def update_slow(self):
+	def update(self):
 		lidar_array = self.car.lidar.get_samples()
 		distance, degree = self._farthest_lidar(lidar_array)
 		print("degree - ", degree)
-		logging.info(f"DISTANCE - {distance} , DEGREE - {degree}")
+		#logging.info(f"DISTANCE - {distance} , DEGREE - {degree}")
 
-		rad_follow = []
-		if self.mutils.sign(degree):
-			rad_follow = self.rad_log_decay(degree, 0)
-		else:
-			rad_follow = self.rad_log_growth(0, degree)
+		self.car.drive.set_speed_angle(0.1, degree)
 
-		for i, c in enumerate(rad_follow):
-			self.car.set_speed_angle(0.1, c)
-
-	def update(self):
+	def update_slow(self):
 		pass
 
 if __name__ == "__main__":
