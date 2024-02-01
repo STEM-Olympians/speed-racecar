@@ -1,0 +1,8 @@
+*.pyc
+/scripts/.config
+/documentation
+docs/_build
+*.ipynb_checkpoints/
+.DS_Store
+*_solution.py
+*_solution.ipynb
