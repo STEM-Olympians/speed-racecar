@@ -26,49 +26,35 @@ class RacecarDrive:
 		self.car = create_racecar()
 		self.mutils = MathUtils()
 
-		logging.basicConfig(filename="logs/drive_track.log", encoding="utf-8", level=logging.DEBUG, filemode="w")
-
 	def _farthest_lidar(self, lidar_array):
 		distance = 0
 		degree = 0
 
 		for i, c in enumerate(lidar_array):
 			rotations_count = i
-			#degree_percent = ((rotations_count*2)/self.car.lidar.get_num_samples())-1
 			degree_percent = rotations_count*2/self.car.lidar.get_num_samples()-1
 
-			if c > distance and degree_percent > -0.5 and degree_percent < 0.5:
+			if c > distance:
 				distance = c
 				degree = degree_percent
 
-		return [distance, degree]
+		return [degree, distance]
 
-	def rad_log_growth(self, bounds_min, bounds_max):
-		arr = [bounds_min]
-		while self.mutils.modified_log(arr[-1]) < bounds_max:
-			arr.append(self.mutils.modified_log(arr[-1]))
-		return arr
-
-	def rad_log_decay(self, bounds_min, bounds_max):
-		arr = [bounds_max]
-		while self.mutils.modified_log(arr[-1]) > bounds_min:
-			arr.append(self.mutils.modified_log(arr[-1]))
-		return arr
+	def angle_time(self, angle, angvel):
+		return angle/angvel
 
 	def start(self):
-		self.car.drive.set_max_speed(1)
+		self.car.drive.set_max_speed(0.5)
 		self.car.drive.stop() # begin at a standstill
-
-	def update(self):
-		lidar_array = self.car.lidar.get_samples()
-		distance, degree = self._farthest_lidar(lidar_array)
-		print("degree - ", degree)
-		#logging.info(f"DISTANCE - {distance} , DEGREE - {degree}")
-
-		self.car.drive.set_speed_angle(0.1, degree)
 
 	def update_slow(self):
 		pass
+
+	def update(self):
+		lidar = self.car.lidar.get_samples()
+		degree, distance = self._farthest_lidar(lidar)
+		print(f"DEGREE - {degree} | DISTANCE {distance}")
+		self.car.drive.set_speed_angle(1, degree)
 
 if __name__ == "__main__":
 	obj = RacecarDrive()
