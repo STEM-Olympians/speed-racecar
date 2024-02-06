@@ -10,17 +10,6 @@ class MathUtils:
 	def sign(self, num):
 		return bool(num-num) # True is positive, False is negative
 
-	# represent logarithms in a non-erroneous way and in a way that fits the needs of this algorithm
-	def modified_log(self, num):
-		if num == 0:
-			return 0
-
-		elif not self.sign(num):
-			return -math.log(abs(num))
-
-		else:
-			return math.log(num)
-
 class RacecarDrive:
 	def __init__(self):
 		self.car = create_racecar()
@@ -32,23 +21,16 @@ class RacecarDrive:
 
 		for i, c in enumerate(lidar_array):
 			rotations_count = i
-			degree_percent = rotations_count*2/self.car.lidar.get_num_samples()-1
-
+			degree_conversion = rotations_count*2/self.car.lidar.get_num_samples()-1
 			if c > distance:
 				distance = c
-				degree = degree_percent
+				degree = degree_conversion
 
 		return [degree, distance]
-
-	def angle_time(self, angle, angvel):
-		return angle/angvel
 
 	def start(self):
 		self.car.drive.set_max_speed(0.5)
 		self.car.drive.stop() # begin at a standstill
-
-	def update_slow(self):
-		pass
 
 	def update(self):
 		lidar = self.car.lidar.get_samples()
@@ -58,5 +40,5 @@ class RacecarDrive:
 
 if __name__ == "__main__":
 	obj = RacecarDrive()
-	obj.car.set_start_update(obj.start, obj.update, update_slow=obj.update_slow) # setting an initialization function (that runs on start) and an update function (a function which is called every frame)
+	obj.car.set_start_update(obj.start, obj.update) # setting an initialization function (that runs on start) and an update function (a function which is called every frame)
 	obj.car.go()
