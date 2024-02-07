@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 sys.path.insert(0, "../library") # python quirks
 from racecar_core import create_racecar, physics
 import racecar_utils
@@ -16,15 +17,11 @@ class RacecarDrive:
 		self.mutils = MathUtils()
 
 	def _farthest_lidar(self, lidar_array):
-		distance = 0
-		degree = 0
+		lidar_array = np.array(lidar_array)
+		maximum = np.argmax(lidar_array)
 
-		for i, c in enumerate(lidar_array):
-			rotations_count = i
-			degree_conversion = rotations_count*2/self.car.lidar.get_num_samples()-1
-			if c > distance:
-				distance = c
-				degree = degree_conversion
+		distance = lidar_array[maximum]
+		degree = (180-(maximum/2))/180
 
 		return [degree, distance]
 
@@ -36,7 +33,7 @@ class RacecarDrive:
 		lidar = self.car.lidar.get_samples()
 		degree, distance = self._farthest_lidar(lidar)
 		print(f"DEGREE - {degree} | DISTANCE {distance}")
-		self.car.drive.set_speed_angle(1, degree)
+		self.car.drive.set_speed_angle(0.3, degree)
 
 if __name__ == "__main__":
 	obj = RacecarDrive()
