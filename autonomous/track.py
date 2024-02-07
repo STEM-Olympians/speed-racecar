@@ -21,7 +21,7 @@ class RacecarDrive:
 		maximum = np.argmax(lidar_array)
 
 		distance = lidar_array[maximum]
-		degree = (180-(maximum/2))/180
+		degree = (180-(maximum/2))/180 # maps 720 length array to -1 to +1 where over 180 degrees increases from -1 to 0.
 
 		return [degree, distance]
 
@@ -37,5 +37,5 @@ class RacecarDrive:
 
 if __name__ == "__main__":
 	obj = RacecarDrive()
-	obj.car.set_start_update(obj.start, obj.update) # setting an initialization function (that runs on start) and an update function (a function which is called every frame)
+	obj.car.set_start_update(obj.start, obj.update)
 	obj.car.go()
