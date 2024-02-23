@@ -1,8 +1,17 @@
 *.pyc
+<<<<<<< HEAD
 /scripts/.config
 /documentation
+=======
+./scripts/.config
+./documentation
+>>>>>>> 5683ffe (asdf)
 docs/_build
 *.ipynb_checkpoints/
 .DS_Store
 *_solution.py
 *_solution.ipynb
+<<<<<<< HEAD
+=======
+./venv
+>>>>>>> 5683ffe (asdf)
