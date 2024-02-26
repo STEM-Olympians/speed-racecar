@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-sys.path.insert(0, "../library") # python quirks
+sys.path.insert(0, "../../library") # python quirks
 from racecar_core import create_racecar, physics
 import racecar_utils
 import math
