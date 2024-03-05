@@ -1,8 +1,9 @@
 import numpy as np
 import nptyping
 import sys
+import os
 import file
-sys.path.insert(0, "../library")
+sys.path.insert(0, "/Users/mitya/desktop/speed/speed-racecar/library")
 import racecar_core
 import racecar_utils
 
@@ -18,7 +19,6 @@ class Agent:
 		lidarsamples = np.expand_dims(self.car.lidar.get_samples(), axis=3)
 
 		file_obj = file.File()
-
 
 		file_obj.write_data(lidarsamples)
 
