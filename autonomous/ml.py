@@ -21,6 +21,7 @@ Fitness function will be scored in stuff like which one has has a lower angular 
 After each game run of 20 seconds, the agents will be scored, and only the fit will survive.
 """
 
+# None of the code from evolution class has been tested yet.
 class Evolution:
 	def __init__(self):
 
