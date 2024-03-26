@@ -3,7 +3,7 @@ import nptyping
 import sys
 import os
 import file
-sys.path.insert(0, "/Users/mitya/desktop/speed/speed-racecar/library")
+sys.path.insert(0, "/Users/mitya/desktop/speed/racecar/library")
 import racecar_core
 import racecar_utils
 
@@ -16,7 +16,8 @@ class Agent:
 		self.car.drive.set_max_speed(0.5)
 		self.car.drive.stop() # start at a standstill
 	def update(self):
-		lidarsamples = np.expand_dims(self.car.lidar.get_samples(), axis=3)
+		#lidarsamples = np.expand_dims(self.car.lidar.get_samples(), axis=3)
+		lidarsamples = self.car.lidar.get_samples()
 
 		file_obj = file.File()
 
