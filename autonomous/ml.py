@@ -12,20 +12,20 @@ import logging
 
 
 """
-The game will run for 20 seconds.
 
-The racecar agent will collect angular velocity, nearest lidar, farthest lidar, and lidar directly in front of the car.
+10 instances of the game will run at the same time.
 
-Fitness function will be scored in stuff like which one has has a lower angular velocity, has the highest farthest nearest-lidar for the longest duration of time, how well the car's front-lidar lines up with its farthest-lidar. This fitness function will return the difference of the current result and desired result. The desired result being the ideal outcome of the track performance.
+After all of them terminate, the fittest node will be determined, and its genome will be passed down in mutated form to the next generation.
 
-After each game run of 20 seconds, the agents will be scored, and only the fit will survive.
+The fitness function will be largely based on parameters like time to survive, and productivity encouragement, like preventing the car from just going in circles.
+
 """
 
-# None of the code from evolution class has been tested yet.
+# Methods for evolutionary processes.
 class Evolution:
 	def __init__(self):
 
-		self.rc = RacecarDrive()
+		#self.rc = RacecarDrive()
 
 		self.all_agents=np.array([])
 
@@ -36,7 +36,7 @@ class Evolution:
 			"time_to_crash":0,
 		}
 
-	def mutate_child(child):
+	def mutate_child(self, child):
 		possible_mutations = ["insert", "remove", "alter"]
 		mutation = random.choice(possible_mutations)
 
@@ -59,14 +59,12 @@ class Evolution:
 
 			child = np.put(child, alter_index, alter_value)
 
-	def fitness(self, ):
-		final_result = 0
+		return child
 
+	def fitness(self, turn_too_far, time_to_crash_seconds):
+		return (int(turn_too_far)*10)+time_to_crash_seconds
 
-		return final_result
-
-
-# creating the environment
+# A class for collecting data about the environment and the car.
 class RacecarDrive:
 	def __init__(self):
 		self.car       = create_racecar()
