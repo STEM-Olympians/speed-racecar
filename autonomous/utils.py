@@ -1,3 +1,4 @@
+import os
 import pyautogui
 import pygetwindow as gw
 
@@ -25,29 +26,37 @@ class FileUtils:
 		return dat[str(max(map(int, dat.keys())))]
 
 class GUIUtils:
-	def click(self, game_window_name, x_percent, y_percent):
-		window = gw.getWindowsWithTitle(game_window_name)[0]
+	def __init__(self, game_window_name):
+		self.game_window_name = game_window_name
+
+	def _click(self, x, y):
+		window = gw.getWindowsWithTitle(self.game_window_name)[0]
 		print("get window with title")
 
 		window.activate()
 		print("activated window")
-
-		wleft, wtop, wwidth, wheight = window.left, window.top, window.width, window.height
-		print("got dimensions")
-
-		x = wleft + int(wheight*x_percent)
-		y = wtop  + int(wtop*y_percent)
-		print("multiplying data or something")
 
 		pyautogui.click(x, y)
 		print("clicked point on screen")
 
 	def enter(self):
-		window = gw.getWindowsWithTitle(game_window_name)[0]
-		print("get window with title")
+		window = gw.getWindowsWithTitle(self.game_window_name)[0]
 
 		window.activate()
-		print("activated window")
 
 		pyautogui.press("enter")
-		print("enter pressed")
+
+	# x343 y480 <- start button
+	def start(self):
+		window = gw.getwindowWithTitle(self.game_window_name)[0]
+
+		window.activate()
+
+		self._click(343, 480)
+
+	def end(self):
+		window = gw.getWindowWithTitle(self.game_window_name)[0]
+
+		window.activate()
+
+		pyautogui.press("escape")

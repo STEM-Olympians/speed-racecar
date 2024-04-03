@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from utils import MathUtils
+import utils
 import random
 from threading import Thread, Lock
 sys.path.insert(0, "../library") # python quirks
@@ -21,22 +21,42 @@ The fitness function will be largely based on parameters like time to survive, a
 
 """
 
-# Methods for evolutionary processes.
-class Evolution:
+	# you can just mutate everything in the start function
+	# you can append everythign to the file after the car crashes without actually stopping the car process, but you can do that in the parent process if you'd like.
+	# the rule for playing the instructions is that it plays a new instruction every 0.5 seconds. So it will play a new instruction for every iteration of the slow update, and the slow update time will be set to 0.5 in the start function.
+	# crash will be checked when deciding whether to stop the simulation or not, and time-to-crash and angular velocity will be used in order to determine fitness function, and the fitness function of the instruction set in the json file, and the one that was just played will be conditioned, whichever one is better will be set as the json file instruction set that will be referenced in later playthroughs or training iterations.
+
+# racecar run is going to take the instruction set in the json file and is going to play it
+class RacecarRun:
 	def __init__(self):
+		self.car = create_racecar()
 
-		#self.rc = RacecarDrive()
+	def start(self):
+		self.car.set_update_slow_time(0.5)
 
-		self.all_agents=np.array([])
+	def update_slow(self):
+		pass
 
-		# template datastructure for what is to be put into the fitness function
-		# tuple: 0=angle 1=distance
-		self.fitness_datastructure = {
+def run(self):
+	rcrun = RacecarRun()
+	rcrun.set_start_update(start, None, update_slow)
+	rcrun.go()
+
+
+# racecar train is going to train the racecar evolutionary algortihm
+class RacecarTrain:
+	def __init__(self):
+		self.current_agent=np.array([])
+		self.car = create_racecar()
+
+# template datastructure for what is to be put into the fitness function
+# tuple: 0=angle 1=distance
+		fitness_datastructure = {
 			"turned_too_far":False,
 			"time_to_crash":0,
 		}
 
-	def mutate_child(self, child):
+	def mutate(self, agent):
 		possible_mutations = ["insert", "remove", "alter"]
 		mutation = random.choice(possible_mutations)
 
@@ -65,10 +85,9 @@ class Evolution:
 		return (int(turn_too_far)*10)+time_to_crash_seconds
 
 # A class for collecting data about the environment and the car.
-class RacecarDrive:
-	def __init__(self):
-		self.car       = create_racecar()
-		self.mutils    = MathUtils()
+
+	car       = create_racecar()
+	mutils    = utils.MathUtils()
 
 	def farthest_lidar(self, lidar_array):
 		lidar_array = np.array(lidar_array)
@@ -107,11 +126,12 @@ class RacecarDrive:
 				return False
 			return True
 
-
 	def start(self):
 		self.car.drive.set_max_speed(1)
 		self.car.drive.stop() # begin at a standstill
+		self.car.set_update_slow_time(0.5)
 
+	# upate function is going to mainly be checking for the crash
 	def update(self):
 		"""
 		print("CRASH STATUS ", self.is_crashed())
@@ -126,10 +146,9 @@ class RacecarDrive:
 		self.car.drive.set_speed_angle(0.3, 0.6)
 
 	def update_slow(self):
-		pass
+			pass
 
 
-if __name__ == "__main__":
-	rc = RacecarDrive()
-	rc.car.set_start_update(rc.start, rc.update, update_slow=rc.update_slow)
-	rc.car.go()
+def train(car):
+	car.set_start_update(rc.start, rc.update, update_slow=rc.update_slow)
+	car.go()
