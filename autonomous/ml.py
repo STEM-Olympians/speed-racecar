@@ -30,17 +30,32 @@ The fitness function will be largely based on parameters like time to survive, a
 class RacecarRun:
 	def __init__(self):
 		self.car = create_racecar()
+		u = utils.FileUtils("data.json")
+		self.dat_arr = u.read_data("instruction_set")
+		self.i = -1
+		self.speed = 0.3
 
 	def start(self):
-		self.car.set_update_slow_time(0.5)
+		self.car.drive.set_max_speed(self.speed)
+		self.car.drive.stop()
+		self.car.set_update_slow_time(1.5)
 
-	def update_slow(self):
+	def update(self):
 		pass
 
-def run(self):
-	rcrun = RacecarRun()
-	rcrun.set_start_update(start, None, update_slow)
-	rcrun.go()
+	def update_slow(self):
+		self.i += 1
+		if self.i < len(self.dat_arr)-1:
+			self.car.drive.set_speed_angle(self.speed, self.dat_arr[self.i])
+		else:
+			self.car.drive.stop()
+
+"""
+run code:
+	rc = RacecarRun()
+	rc.set_start_update(rc.start, None, rc.update_slow)
+	rc.go()
+"""
 
 
 # racecar train is going to train the racecar evolutionary algortihm
@@ -114,14 +129,16 @@ class RacecarTrain:
 
 	def angular_velocity_turn_too_far(self):
 		turn = self.car.physics.get_angular_velocity()[1]
-		print(turn)
 		if turn > 0.6 or turn < -0.6: # I basically made up the 0.6 figure.
 			return True
 		return False
 
 	def is_crashed(self):
 		start = time.time()
-		while time.time()-start <= 2:
+		print("TIME - ", round(time.time()-start))
+		while time.time()-start >= 2:
+			print("asdlfjasldkfjaslkdfjsalk")
+			print("STOPPED? IDK - ", self.car.physics.get_angular_velocity()[2])
 			if self.car.physics.get_angular_velocity()[2] <= 0.1:
 				return False
 			return True
@@ -139,6 +156,7 @@ class RacecarTrain:
 		"""
 		if self.is_crashed():
 			print("crash detected.")
+
 		if self.angular_velocity_turn_too_far():
 			print("sharp turn detected.")
 
@@ -148,7 +166,3 @@ class RacecarTrain:
 	def update_slow(self):
 			pass
 
-
-def train(car):
-	car.set_start_update(rc.start, rc.update, update_slow=rc.update_slow)
-	car.go()

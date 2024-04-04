@@ -1,4 +1,5 @@
 import os
+import json
 import pyautogui
 import pygetwindow as gw
 
@@ -7,23 +8,19 @@ class MathUtils:
 		return bool(num-num)
 
 class FileUtils:
-	def write_data(self, data):
-		with open("buffer.json", "r+") as f:
-			dat = json.load(f)
-			try:
-				dat[str(max(map(int, dat.keys()))+1)] = data.tolist()
-			except ValueError:
-				dat["0"] = data.tolist()
+	def __init__(self, filename):
+		self.filename = filename
 
-			f.seek(0)
-			json.dump(dat, f)
-			f.truncate()
-
-	def read_data(self) -> list:
-		with open("buffer.json", "r+") as f:
+	def write_data(self, key, data):
+		with open(self.filename, "r+") as f:
 			dat = json.load(f)
-			print(dat.keys())
-		return dat[str(max(map(int, dat.keys())))]
+			dat[key] = data
+		return
+
+	def read_data(self, key) -> list:
+		with open(self.filename, "r+") as f:
+			dat = json.load(f)
+			return dat[key]
 
 class GUIUtils:
 	def __init__(self, game_window_name):
