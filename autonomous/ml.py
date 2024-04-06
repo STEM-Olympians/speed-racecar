@@ -187,6 +187,8 @@ class RacecarTrain:
 
             print("crashed, time - ", self.time_to_crash)
 
+            sys.exit(0)
+
         self.i += 1
         print(self.mutated_driving_instruction_set)
         if self.i < len(self.mutated_driving_instruction_set)-1:
