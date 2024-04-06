@@ -15,6 +15,9 @@ class FileUtils:
 		with open(self.filename, "r+") as f:
 			dat = json.load(f)
 			dat[key] = data
+			f.seek(0)
+			json.dump(dat, f, indent=4)
+
 		return
 
 	def read_data(self, key) -> list:

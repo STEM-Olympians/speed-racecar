@@ -33,7 +33,7 @@ class RacecarRun:
 		u = utils.FileUtils("data.json")
 		self.dat_arr = u.read_data("instruction_set")
 		self.i = -1
-		self.speed = 0.3
+		self.speed = 0.5
 
 	def start(self):
 		self.car.drive.set_max_speed(self.speed)
@@ -60,109 +60,137 @@ run code:
 
 # racecar train is going to train the racecar evolutionary algortihm
 class RacecarTrain:
-	def __init__(self):
-		self.current_agent=np.array([])
-		self.car = create_racecar()
+    def __init__(self):
+        self.mutils = utils.MathUtils()
+        self.current_agent=np.array([])
+        self.car = create_racecar()
+        self.speed = 0.5
 
-# template datastructure for what is to be put into the fitness function
-# tuple: 0=angle 1=distance
-		fitness_datastructure = {
-			"turned_too_far":False,
-			"time_to_crash":0,
-		}
+        #self.start_time = 0 # simply defining the variable for the start time, time of simulation starting will be assigned to it when self.start() is called.
+        #self.start_time_game_time_to_crash = 0
 
-	def mutate(self, agent):
-		possible_mutations = ["insert", "remove", "alter"]
-		mutation = random.choice(possible_mutations)
+        self.time_to_crash = 0
+        self.times_turned_too_far = 0
+
+        self.u = utils.FileUtils("data.json")
+        print(self.u.read_data("instruction_set"))
+        self.mutated_driving_instruction_set = self.mutate(np.array(self.u.read_data("instruction_set")))
+        print("MUTATED INSTRUCTION SET - ", self.mutated_driving_instruction_set)
+
+        self.previous_fitness = self.u.read_data("fitness")
+        self.i = -1
+
+		#self.start = time.time() # start time to check time to crash
+
+		#self.time_to_crash = 0 # this value will be decided when you actually crash, and the difference of the start time and ththe time of the crash is calculated.
+
+		# there must be one crash signal in order to determine to reset
+		# it must turn too far once in order to determine to reset
+		#self.death_factor_tally_overturn = 0
+
+    # template datastructure for what is to be put into the fitness function
+    # tuple: 0=angle 1=distance
+    def mutate(self, child):
+        possible_mutations = ["insert", "remove", "alter"]
+        mutation = random.choice(possible_mutations)
 
 		# insert
-		if mutation == possible_mutations[0]:
-			replacement_value = random.uniform(-1, +1)
+        if mutation == possible_mutations[0]:
+            print("insert")
+            replacement_value = random.uniform(-1, +1)
+            child = np.append(child, replacement_value)
 
-			child = np.append(child, replacement_value)
-
-		# remove
-		elif mutation == possible_mutations[1]:
-			deletion_index = random.uniform(0, len(child)-1)
-
-			child = np.delete(chid, deletion_index, None)
+        # remove
+        elif mutation == possible_mutations[1]:
+            print("remove")
+            deletion_index = random.randint(0, len(child)-1)
+            child = np.delete(child, deletion_index, None)
 
 		# alter
-		elif mutation == possible_mutations[2]:
-			alter_index = random.ranint(len(child)-1)
-			alter_value = random.randint(-1, +1)
+        elif mutation == possible_mutations[2]:
+            print("alter")
+            alter_index = random.randint(0, len(child)-1)
+            print("alter index - ", alter_index)
+            alter_value = random.uniform(-1, 1)
+            print("alter_value - ", alter_value)
 
-			child = np.put(child, alter_index, alter_value)
+            #child = np.put(child, alter_index, alter_value)
+            np.put(child, alter_index, alter_value)
+            print("child - ", child)
 
-		return child
+        return child
 
-	def fitness(self, turn_too_far, time_to_crash_seconds):
-		return (int(turn_too_far)*10)+time_to_crash_seconds
+    def fitness(self, times_turned_too_far, time_to_crash_seconds):
+        return time_to_crash_seconds-times_turned_too_far
 
-# A class for collecting data about the environment and the car.
+    def farthest_lidar(self, lidar_array):
+        lidar_array = np.array(lidar_array)
+        maximum = np.argmax(lidar_array)
 
-	car       = create_racecar()
-	mutils    = utils.MathUtils()
+        distance = lidar_array[maximum]
+        angle = (180-(maximum/2))/180 # maps 720 length array to -1 to +1 where over 180 degrees increases from -1 to 0.
+        return (angle, distance)
 
-	def farthest_lidar(self, lidar_array):
-		lidar_array = np.array(lidar_array)
-		maximum = np.argmax(lidar_array)
+    def nearest_lidar(self, lidar_array):
+        lidar_array = np.array(lidar_array)
+        window      = (0, 360)
+        angle, distance    = racecar_utils.get_lidar_closest_point(lidar_array, window)
+        return (distance, angle)
 
-		distance = lidar_array[maximum]
-		angle = (180-(maximum/2))/180 # maps 720 length array to -1 to +1 where over 180 degrees increases from -1 to 0.
+    def front_lidar(self, lidar_array):
+        lidar_array = np.array(lidar_array)
 
-		return (angle, distance)
+        distance = lidar_array[0]
+        angle    = (180-(0/2))/180
 
-	def nearest_lidar(self, lidar_array):
-		lidar_array = np.array(lidar_array)
-		window      = (0, 360)
-		angle, distance    = racecar_utils.get_lidar_closest_point(lidar_array, window)
-		return (distance, angle)
+        return (distance, angle)
 
-	def front_lidar(self, lidar_array):
-		lidar_array = np.array(lidar_array)
+    def angular_velocity_turn_too_far(self):
+        turn = self.car.physics.get_angular_velocity()[2]
+        print("TURN ", turn)
+        if turn > 0.6 or turn < -0.6: # I basically made up the 0.6 figure.
+            return True
+        return False
 
-		distance = lidar_array[0]
-		angle    = (180-(0/2))/180
+    # this funuction won't work if it's called in self.update() because self.update() runs every frame, which will violate the 2 second while loop used to determine crash. Instead, call in update_slow()
+    def is_crashed(self):
+        if time.time()-self.start_time >= 2:
+            if self.car.physics.get_linear_acceleration()[2] <= 0.05:
+                return True
 
-		return (distance, angle)
+    def start(self):
+        self.car.drive.set_max_speed(1)
+        self.car.drive.stop() # begin at a standstill
+        self.car.set_update_slow_time(1)
+        self.start_time = time.time()
+        self.start_time_game_time_to_crash = time.time()
 
-	def angular_velocity_turn_too_far(self):
-		turn = self.car.physics.get_angular_velocity()[1]
-		if turn > 0.6 or turn < -0.6: # I basically made up the 0.6 figure.
-			return True
-		return False
+    def update(self):
+        if self.angular_velocity_turn_too_far():
+            self.times_turned_too_far += 1
+            print("turn too far")
 
-	def is_crashed(self):
-		start = time.time()
-		print("TIME - ", round(time.time()-start))
-		while time.time()-start >= 2:
-			print("asdlfjasldkfjaslkdfjsalk")
-			print("STOPPED? IDK - ", self.car.physics.get_angular_velocity()[2])
-			if self.car.physics.get_angular_velocity()[2] <= 0.1:
-				return False
-			return True
+        #self.car.drive.set_speed_angle(1, -0.6)
+        self.car.drive.set_speed_angle(self.speed, 0.1)
 
-	def start(self):
-		self.car.drive.set_max_speed(1)
-		self.car.drive.stop() # begin at a standstill
-		self.car.set_update_slow_time(0.5)
+    def update_slow(self):
+        if self.is_crashed():
+            self.time_to_crash = time.time()-self.start_time_game_time_to_crash
+            print(self.time_to_crash)
+            fitness = self.fitness(self.times_turned_too_far, self.time_to_crash)
+            print("CURRENT FITNESS ", fitness)
+            print("PREV FITNESS", self.previous_fitness)
 
-	# upate function is going to mainly be checking for the crash
-	def update(self):
-		"""
-		print("CRASH STATUS ", self.is_crashed())
-		print("FAR TURN STATUS ", self.angular_velocity_turn_too_far())
-		"""
-		if self.is_crashed():
-			print("crash detected.")
+            if fitness > self.previous_fitness:
+                self.u.write_data("instruction_set", self.mutated_driving_instruction_set.tolist())
+                self.u.write_data("fitness", fitness)
 
-		if self.angular_velocity_turn_too_far():
-			print("sharp turn detected.")
+            print("crashed, time - ", self.time_to_crash)
 
-		#self.car.drive.set_speed_angle(0.3, -0.6)
-		self.car.drive.set_speed_angle(0.3, 0.6)
-
-	def update_slow(self):
-			pass
+        self.i += 1
+        print(self.mutated_driving_instruction_set)
+        if self.i < len(self.mutated_driving_instruction_set)-1:
+            self.car.drive.set_speed_angle(self.speed, self.mutated_driving_instruction_set[self.i])
+        else:
+            self.car.drive.stop()
 

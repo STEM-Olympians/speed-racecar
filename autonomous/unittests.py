@@ -1,18 +1,17 @@
 import unittest
 import numpy as np
+import utils
 import ml
 
 class Tests(unittest.TestCase):
-	def test_evolution(self):
-		evolution = ml.Evolution()
-		fitness_value = evolution.fitness(True, 8)
-		self.assertEqual(fitness_value, (int(True)*10)+8)
+	def test_json_file(self):
+		f = utils.FileUtils("data.json")
 
-	def test_mutation(self):
-		evolution = ml.Evolution()
-
-		child_node = np.array([1, 0.4, -1, 0.3])
-		print(evolution.mutate_child(child_node))
+		d1 = f.read_data("fitness")
+		print(d1)
+		f.write_data("fitness", 0.5)
+		d2 = f.read_data("fitness")
+		print(d2)
 
 
 
