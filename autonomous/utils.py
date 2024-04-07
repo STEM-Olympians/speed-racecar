@@ -1,7 +1,11 @@
 import os
 import json
+
+import time
+import threading
 import pyautogui
 import pygetwindow as gw
+from AppKit import NSWorkspace
 
 class MathUtils:
 	def sign(self, num):
@@ -26,37 +30,35 @@ class FileUtils:
 			return dat[key]
 
 class GUIUtils:
-	def __init__(self, game_window_name):
-		self.game_window_name = game_window_name
+    def __init__(self, game_window_name):
+        self.game_window_name = game_window_name
 
-	def _click(self, x, y):
-		window = gw.getWindowsWithTitle(self.game_window_name)[0]
-		print("get window with title")
+    def _click(self, x, y):
+        while True:
+            if NSWorkspace.sharedWorkspace().activeApplication()['NSApplicationName'] == "RacecarSim":
+                time.sleep(0.5)
+                pyautogui.click(x, y)
+                break
 
-		window.activate()
-		print("activated window")
+    def _press(self, keyname):
+        while True:
+            if NSWorkspace.sharedWorkspace().activeApplication()['NSApplicationName'] == "RacecarSim":
+                time.sleep(0.5)
+                pyautogui.press(keyname)
+                break
 
-		pyautogui.click(x, y)
-		print("clicked point on screen")
+    def enter(self):
+        l = lambda: os.system("/bin/zsh -c \"source ~/.zshrc; cd ~/Desktop/speed/racecar/autonomous; racecar sim handler.py\"")
+        t = threading.Thread(target=l, args=()).start()
+        time.sleep(0.5)
+        self._press("enter")
 
-	def enter(self):
-		window = gw.getWindowsWithTitle(self.game_window_name)[0]
-
-		window.activate()
-
-		pyautogui.press("enter")
 
 	# x343 y480 <- start button
-	def start(self):
-		window = gw.getwindowWithTitle(self.game_window_name)[0]
+    def start(self):
+        startButtonX  = 343
+        startButtonY  = 480
+        self._click(startButtonX, startButtonY)
 
-		window.activate()
-
-		self._click(343, 480)
-
-	def end(self):
-		window = gw.getWindowWithTitle(self.game_window_name)[0]
-
-		window.activate()
-
-		pyautogui.press("escape")
+    def end(self):
+        self._press("esc")

@@ -15,10 +15,10 @@ class Tests(unittest.TestCase):
 
 	def test_gui_utils(self):
 		gutils = utils.GUIUtils("RacecarSim")
-
-		gutils.end()
-		gutils.start()
-		gutils.enter()
+		while True:
+			gutils.start()
+			gutils.enter()
+			gutils.end()
 
 
 
