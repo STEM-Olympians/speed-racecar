@@ -12,26 +12,30 @@ class MathUtils:
 		return bool(num-num)
 
 class FileUtils:
-	def __init__(self, filename):
-		self.filename = filename
+    def __init__(self, filename):
+        self.filename = filename
 
-	def write_data(self, key, data):
-		with open(self.filename, "r+") as f:
-			dat = json.load(f)
-			dat[key] = data
-			f.seek(0)
-			json.dump(dat, f, indent=4)
+    def write_data(self, key, data):
+        with open(self.filename, "r+") as f:
+            dat = json.load(f)
+            dat[key] = data
+            print(dat)
 
-		return
+            f.seek(0)
+            f.truncate()
+            json.dump(dat, f, indent=4)
 
-	def read_data(self, key) -> list:
-		with open(self.filename, "r+") as f:
-			dat = json.load(f)
-			return dat[key]
+        return
+
+    def read_data(self, key) -> list:
+        with open(self.filename, "r+") as f:
+            dat = json.load(f)
+            return dat[key]
 
 class GUIUtils:
     def __init__(self, game_window_name):
         self.game_window_name = game_window_name
+        self.futils = FileUtils("data.json")
 
     def _click(self, x, y):
         while True:
@@ -49,10 +53,14 @@ class GUIUtils:
 
     def enter(self):
         l = lambda: os.system("/bin/zsh -c \"source ~/.zshrc; cd ~/Desktop/speed/racecar/autonomous; racecar sim handler.py\"")
-        t = threading.Thread(target=l, args=()).start()
-        time.sleep(0.5)
+        t = threading.Thread(target=l, args=())
+        t.start()
+
+        time.sleep(0.3)
         self._press("enter")
 
+        t.join()
+        return
 
 	# x343 y480 <- start button
     def start(self):

@@ -147,7 +147,7 @@ class RacecarTrain:
 
     def angular_velocity_turn_too_far(self):
         turn = self.car.physics.get_angular_velocity()[2]
-        print("TURN ", turn)
+        #print("TURN ", turn)
         if turn > 0.6 or turn < -0.6: # I basically made up the 0.6 figure.
             return True
         return False
