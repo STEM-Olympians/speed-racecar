@@ -54,12 +54,14 @@ class GUIUtils:
     def enter(self):
         l = lambda: os.system("/bin/zsh -c \"source ~/.zshrc; cd ~/Desktop/speed/racecar/autonomous; racecar sim handler.py\"")
         t = threading.Thread(target=l, args=())
+
         t.start()
 
-        time.sleep(0.3)
+        time.sleep(0.6)
         self._press("enter")
 
         t.join()
+
         return
 
 	# x343 y480 <- start button
