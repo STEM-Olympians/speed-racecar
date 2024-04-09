@@ -97,7 +97,7 @@ class RacecarTrain:
 		# insert
         if mutation == possible_mutations[0]:
             print("insert")
-            replacement_value = random.uniform(-1, +1)
+            replacement_value = random.uniform(-0.5, 0.5)
             child = np.append(child, replacement_value)
 
         # remove
@@ -111,7 +111,7 @@ class RacecarTrain:
             print("alter")
             alter_index = random.randint(0, len(child)-1)
             print("alter index - ", alter_index)
-            alter_value = random.uniform(-1, 1)
+            alter_value = random.uniform(-0.5, 0.5)
             print("alter_value - ", alter_value)
 
             #child = np.put(child, alter_index, alter_value)
@@ -148,7 +148,7 @@ class RacecarTrain:
     def angular_velocity_turn_too_far(self):
         turn = self.car.physics.get_angular_velocity()[2]
         #print("TURN ", turn)
-        if turn > 0.6 or turn < -0.6: # I basically made up the 0.6 figure.
+        if turn > 0.5 or turn < -0.5: # I basically made up the 0.6 figure.
             return True
         return False
 
