@@ -97,7 +97,7 @@ class RacecarTrain:
 		# insert
         if mutation == possible_mutations[0]:
             print("insert")
-            replacement_value = random.uniform(-0.5, 0.5)
+            replacement_value = random.uniform(-0.4, 0.4)
             child = np.append(child, replacement_value)
 
         # remove
@@ -111,7 +111,7 @@ class RacecarTrain:
             print("alter")
             alter_index = random.randint(0, len(child)-1)
             print("alter index - ", alter_index)
-            alter_value = random.uniform(-0.5, 0.5)
+            alter_value = random.uniform(-0.4, 0.4)
             print("alter_value - ", alter_value)
 
             #child = np.put(child, alter_index, alter_value)
@@ -171,7 +171,7 @@ class RacecarTrain:
             print("turn too far")
 
         #self.car.drive.set_speed_angle(1, -0.6)
-        self.car.drive.set_speed_angle(self.speed, 0.1)
+        #self.car.drive.set_speed_angle(self.speed, 0.1)
 
     def update_slow(self):
         if self.is_crashed():
@@ -188,11 +188,11 @@ class RacecarTrain:
             print("crashed, time - ", self.time_to_crash)
 
             sys.exit(0)
-
-        self.i += 1
-        print(self.mutated_driving_instruction_set)
-        if self.i < len(self.mutated_driving_instruction_set)-1:
-            self.car.drive.set_speed_angle(self.speed, self.mutated_driving_instruction_set[self.i])
         else:
-            self.car.drive.stop()
+            self.i += 1
+            print(self.mutated_driving_instruction_set)
+            if self.i < len(self.mutated_driving_instruction_set)-1:
+                self.car.drive.set_speed_angle(self.speed, self.mutated_driving_instruction_set[self.i])
+            else:
+                self.car.drive.stop()
 

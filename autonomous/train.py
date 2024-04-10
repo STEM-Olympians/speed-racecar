@@ -5,7 +5,8 @@ import time
 gutils = utils.GUIUtils("RacecarSim")
 while True:
 	gutils.start()
-	time.sleep(0.2)
+	time.sleep(1)
 	gutils.enter()
-	time.sleep(0.2)
+	time.sleep(1)
 	gutils.end()
+	time.sleep(1)
