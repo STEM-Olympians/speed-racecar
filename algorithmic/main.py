@@ -32,11 +32,6 @@ class Algorithmic:
         print("maximum ", maximum)
         print("angle ", angle)
 
-        if angle > 1.0:
-            angle = 1.0
-        if angle < -1.0:
-            angle = -1.0
-
         """
         # add some arbitrary padding to account for the width of the car
         if angle < 0:
@@ -70,7 +65,9 @@ class Algorithmic:
         self.angleToTurn = self.getHighestLidar(self.lidar)[0] # defined in start() to be changed when turn finishes and not when update() resets.
 
         self.car.drive.set_speed_angle(self.speed, self.angleToTurn)
-        self.travel_time = self.angleToTurn
+        self.angvel = self.car.physics.get_angular_velocity()[0]
+        self.travel_time = self.angvel/self.angleToTurn
+
 
         print("Travel Time ", self.travel_time)
         print("Angle to Turn ", self.angleToTurn)
@@ -81,7 +78,8 @@ class Algorithmic:
 
             self.angleToTurn = self.getHighestLidar(self.lidar)[0] # defined in start() to be changed when turn finishes and not when update() resets.z
 
-            self.travel_time = self.angleToTurn
+            self.angvel = self.car.physics.get_angular_velocity()[0]
+            self.travel_time = self.angvel/self.angleToTurn
 
             self.start = time.time() # defined in start() to remain unchanged by update() resets.
             self.car.drive.set_speed_angle(self.speed, self.angleToTurn)
