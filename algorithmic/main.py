@@ -2,6 +2,7 @@ import sys
 import numpy as np
 from datetime import datetime
 import time
+import math
 
 sys.path.insert(0, "../library")
 from racecar_core import create_racecar
@@ -22,36 +23,31 @@ class Algorithmic:
         print(first)
         print("SIZE SECOND ", len(second))
 
-        maximum = np.argmax(np.append(second, first))
+        idx = np.argmax(np.append(second, first))
 
-        distance = lidar_array[maximum]
-        # angle = (180-(maximum/2))/180
-        angle = maximum #**2
-        angle -= 180
-        angle /= 180
-        print("maximum ", maximum)
-        print("angle ", angle)
-
+        distance = lidar_array[idx]
         """
-        # add some arbitrary padding to account for the width of the car
-        if angle < 0:
-            angle += 0.001
-
-        elif angle >= 0:
-            angle += 0.001
-
-        if angle > 1.0:
-            angle = 1.0
-        if angle < -1.0:
-            angle = -1.0
+        angle = idx/180
+        angle -= 1
         """
 
-        print("")
-        print(str(time.time()), " ANGLE - ",    angle)
-        print(str(time.time()), " DISTANCE - ", distance)
-        print("")
+        angle = idx
+        A_constant = math.pi
 
-        return (angle, distance)
+        angle /= 180 # 0 to 2
+        angle -= 1 # shift the non-linear angle to be from -1 to +1
+        angle_nl = angle ** 2 # Non-linear angle: from 0 to 1, but more angles accumulate in the lower half from 0 to 0.5
+        angle_nl = A_constant* angle_nl if angle_nl * A_constant < 1 else 1
+
+        """
+            if angle_nl < 1.0:
+                angle_nl = 1.0
+        """
+
+        turn_angle = -angle_nl if angle < 0 else angle_nl
+
+        return (turn_angle, distance)
+
 
 
     def start(self):
@@ -66,8 +62,14 @@ class Algorithmic:
 
         self.car.drive.set_speed_angle(self.speed, self.angleToTurn)
         self.angvel = self.car.physics.get_angular_velocity()[0]
-        self.travel_time = self.angvel/self.angleToTurn
 
+        """
+        if self.angleToTurn != 0: # main problem here is that the car can't really turn forward
+            self.travel_time = self.angvel/self.angleToTurn
+        else:
+            self.travel_time = 0
+        """
+        self.travel_time = (self.angvel/self.angleToTurn)
 
         print("Travel Time ", self.travel_time)
         print("Angle to Turn ", self.angleToTurn)
@@ -79,7 +81,17 @@ class Algorithmic:
             self.angleToTurn = self.getHighestLidar(self.lidar)[0] # defined in start() to be changed when turn finishes and not when update() resets.z
 
             self.angvel = self.car.physics.get_angular_velocity()[0]
-            self.travel_time = self.angvel/self.angleToTurn
+
+            """
+            if self.angleToTurn != 0:
+                self.travel_time = self.angvel/self.angleToTurn
+            else:
+                self.travel_time = 0
+            """
+
+            self.travel_time = (self.angvel/self.angleToTurn)
+
+
 
             self.start = time.time() # defined in start() to remain unchanged by update() resets.
             self.car.drive.set_speed_angle(self.speed, self.angleToTurn)
