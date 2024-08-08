@@ -17,7 +17,7 @@ class Algorithmic:
         self.turn_history = [0] # determine next turn based on similarity to previous turns to prevent issues with committing to turns.
 
     def highlight(self, distance):
-        if distance < (self.avg + self.dev):
+        if distance > self.avg+(0.7*self.dev):
             print("DISTANCE ", distance)
             return distance
         return 0
@@ -51,7 +51,7 @@ class Algorithmic:
 
         window =  lidar[highest:highest+highestIndex]
         #print(window)
-        return (highest, highest+highestIndex)
+        return (highestIndex, highest+highestIndex)
 
 
     def getHighestLidar(self, lidar_array):
@@ -74,15 +74,15 @@ class Algorithmic:
         #print("SLICED ", sliced)
 
         #idx = np.argmax(sliced)
-        idx = int((first+second)/2)
+        idx = np.argmax(lidar[first:second])
 
-        angle = idx
+        angle = idx+first
         print("IDX ", idx)
         print("FIRST ", first)
         print("SECOND ", second)
 
-        distance = lidar[idx]
-        angle = idx/180
+        distance = lidar[angle]
+        angle = angle/180
         angle -= 1
 
         A_constant = math.pi
@@ -96,6 +96,7 @@ class Algorithmic:
         print("NL ANGLE ", angle_nl)
 
         turn_angle = -angle_nl if angle < 0 else angle_nl
+        print("TURN ANGLE ", turn_angle)
 
         return turn_angle
 
@@ -139,7 +140,10 @@ class Algorithmic:
 
             self.angvel = self.car.physics.get_angular_velocity()[0]
 
-            self.travel_time = (self.angvel/self.angleToTurn)
+            try:
+                self.travel_time = (self.angvel/self.angleToTurn)
+            except RuntimeWarning as e:
+                self.travel_time = 0
 
             #print(summed_buffer_array.shape)
             #print(summed_buffer_array)
