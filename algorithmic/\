@@ -9,6 +9,19 @@ sys.path.insert(0, "../library")
 from racecar_core import create_racecar
 import racecar_utils
 
+class KMeans:
+    def __init__(self, arr: np.ndarray, k: int):
+        """
+            arr: np.ndarray
+                expected array with zero'd non-far distances
+        """
+        self.arr = arr
+        self.k   = k
+
+    def cluster() -> np.ndarray:
+        cluster_indexes = np.random.rand(1,  self.k)
+
+
 class Algorithmic:
     def __init__(self):
         self.car = create_racecar()
@@ -16,42 +29,31 @@ class Algorithmic:
 
         self.turn_history = [0] # determine next turn based on similarity to previous turns to prevent issues with committing to turns.
 
-    def highlight(self, distance):
-        if distance < (self.avg + self.dev):
-            print("DISTANCE ", distance)
-            return distance
-        return 0
-
     def getHighestSummedWindowIndex(self, lidar):
-        self.avg = np.average(lidar)
-        self.dev = np.std(lidar)
+        stddev = np.std(lidar, ddof=0)*2
+        deviated = [i for i in lidar if i > -abs(stddev) and i < abs(stddev)]
+        #print("deviated ", deviated)
 
-        print("STANDARD DEVIATION ", self.dev)
-        print("AVERAGE ", self.avg)
+        VIEW_BUFFER_SIZE = 72
+        summed_buffer_array = []
+        i = 0
+        #print("iterations ", len(lidar)/VIEW_BUFFER_SIZE)
+        while i < len(lidar):
+            summed_buffer_array.append([sum(lidar[i:i+VIEW_BUFFER_SIZE]), i, i+VIEW_BUFFER_SIZE]) # Keep track of high and low indexes in order to decode.
+            i += VIEW_BUFFER_SIZE # note: if there are issues with data, i+100 turn to i+99.
 
-        lidar = list(map(self.highlight, lidar))
-        #print(lidar)
+        resulting = summed_buffer_array[0]
+        print(resulting)
+        for i in range(len(summed_buffer_array)):
+            if summed_buffer_array[i][0] > resulting[0]:
+                resulting = summed_buffer_array[i]
+        #for i in range(len(resulting)):
+        print("Resulting Value ", resulting)
 
-        highest = 0
-        highestIndex = 0
-
-        current = 0
-        #currentIndex = 0
-
-        for i in range(1, len(lidar)):
-            if lidar[i] != 0 and lidar[i-1] == 0:
-                current = 1
-
-            if lidar[i-1] != 0 and lidar[i] != 0:
-                current += 1
-                if current > highest:
-                    print("Highest valued index: ", highestIndex)
-                    highest = current
-                    highestIndex = i-highest
-
-        window =  lidar[highest:highest+highestIndex]
-        #print(window)
-        return (highest, highest+highestIndex)
+        #print("RESULTING ", summed_buffer_array)
+        firstWindowIndex = resulting[1]
+        secondWindowIndex = resulting[2]
+        return (firstWindowIndex, secondWindowIndex)
 
 
     def getHighestLidar(self, lidar_array):
@@ -62,38 +64,33 @@ class Algorithmic:
         lidar = np.append(second, first)
 
 
-        #print("SIZE FIRST ", len(first))
-        #print(first)
-        #print("SIZE SECOND ", len(second))
-        first, second = self.getHighestSummedWindowIndex(lidar)
-        """
-        if not sliced:
-            idx = lidar
-            print("LIDAR  ", lidar)
-        """
-        #print("SLICED ", sliced)
+        print("SIZE FIRST ", len(first))
+        print(first)
+        print("SIZE SECOND ", len(second))
 
-        #idx = np.argmax(sliced)
-        idx = int((first+second)/2)
+        firstWindowIndex, secondWindowIndex = self.getHighestSummedWindowIndex(lidar)
+        firstWindowIndex, secondWindowIndex = 500, 720
 
-        angle = idx
-        print("IDX ", idx)
-        print("FIRST ", first)
-        print("SECOND ", second)
+        idx = np.argmax(lidar[firstWindowIndex:secondWindowIndex])
 
         distance = lidar[idx]
+        """
         angle = idx/180
         angle -= 1
+        """
 
+        angle = idx
         A_constant = math.pi
 
-        #print("LENGTH: ", len(sliced))
-        #angle /= len(lidar)/2 # 0 to 2
-        #angle -= 1 # shift the non-linear angle to be from -1 to +1
-        angle_nl = angle**2# Non-linear angle: from 0 to 1, but more angles accumulate in the lower half from 0 to 0.5
-        #angle_nl = A_constant* angle_nl if angle_nl * A_constant < 1 else 1
-        angle_nl = A_constant*angle_nl if A_constant*angle_nl < 1 else 1
-        print("NL ANGLE ", angle_nl)
+        angle /= 180 # 0 to 2
+        angle -= 1 # shift the non-linear angle to be from -1 to +1
+        angle_nl = angle ** 2 # Non-linear angle: from 0 to 1, but more angles accumulate in the lower half from 0 to 0.5
+        angle_nl = A_constant* angle_nl if angle_nl * A_constant < 1 else 1
+
+        """
+        if angle_nl < 1.0:
+            angle_nl = 1.0
+        """
 
         turn_angle = -angle_nl if angle < 0 else angle_nl
 
