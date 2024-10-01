@@ -27,7 +27,9 @@ class Controller :
    '''
    def drive(self, power, angle):
 
-      angle = -angle
+      #Inverting, because our angle is backwards for some reason
+      # Clamping for no funny mishaps
+      angle = -self.clamp(angle, -90, 90)
       
       # First index is left speed, Second index is right speed
       speeds = self.calculateArcadeSpeeds(power, angle)
