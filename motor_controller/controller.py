@@ -41,6 +41,9 @@ class Controller :
       self.front_right.drive(speeds[1])
       self.back_right.drive(speeds[1])
 
+   def stop(self):
+      self.drive(0, 0)
+
 
    
    def calculateArcadeSpeeds(self, power, angle):
