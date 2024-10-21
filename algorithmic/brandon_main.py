@@ -83,8 +83,12 @@ class Algorithmic:
     def getHighestLidar(self, lidar_array):
         lidar_array = np.array(lidar_array)
 
+        # getting first 90 degrees
         first = lidar_array[0:180]
+        # and last 90
         second = lidar_array[540:-1]
+
+        # Flipping the array? ohh, left then right...?
         lidar = np.append(second, first)
 
 
@@ -108,6 +112,7 @@ class Algorithmic:
         print("SECOND ", second)
 
         distance = lidar[angle]
+
         angle = angle/180
         angle -= 1
 
@@ -121,8 +126,13 @@ class Algorithmic:
         angle_nl = A_constant*angle_nl if A_constant*angle_nl < 1 else 1
         print("NL ANGLE ", angle_nl)
 
+        # Copy sign iirc
         turn_angle = -angle_nl if angle < 0 else angle_nl
         print("TURN ANGLE ", turn_angle)
+
+        # turn_angle, is like nl angle? from -1 to 1??
+        # Shifting back to -90 space
+        turn_angle *= 90
 
         return turn_angle
 
