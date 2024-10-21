@@ -17,13 +17,31 @@ class Algorithmic:
     def __init__(self):
         #self.car = create_racecar()
         self.controller = Controller()
+        self.controller.stop()
         self.lidar_sensor = Lidar_Sensor()
         self.speed = 0.5
 
-        self.start_time = 0
-
         self.turn_history = [0] # determine next turn based on similarity to previous turns to prevent issues with committing to turns.
 
+
+        # defined in start() to remain unchanged by update() resets.
+        # Brandon here - not really sure what the above comment meant... since we do change start time
+        self.start_time = time.time()
+
+        #self.lidar = self.car.lidar.get_samples()
+        self.lidar = self.lidar_sensor.get_samples()
+
+
+        self.angleToTurn = self.getHighestLidar(self.lidar) # defined in start() to be changed when turn finishes and not when update() resets.
+
+        self.turn_history.append(self.angleToTurn)
+
+        # You guys never told me u needed a gyro T-T
+        self.angvel = 0
+
+        self.travel_time = 0
+
+    # Deadbanding fr fr
     def highlight(self, distance):
         if distance > self.avg+(0.7*self.dev):
             print("DISTANCE ", distance)
@@ -119,35 +137,6 @@ class Algorithmic:
 
         return angles[np.argmin(ref)] # will return angle with minimum distance to the relative angle
 
-    def start(self):
-        # honestly not sure if we need these
-        # self.car.drive.set_max_speed(self.speed)
-        # self.car.set_update_slow_time(1)
-
-
-        # self.car.drive.stop()
-        self.controller.stop()
-        
-
-        self.start_time = time.time() # defined in start() to remain unchanged by update() resets.
-
-        #self.lidar = self.car.lidar.get_samples()
-        self.lidar = self.lidar_sensor.get_samples()
-
-
-        self.angleToTurn = self.getHighestLidar(self.lidar) # defined in start() to be changed when turn finishes and not when update() resets.
-
-        self.turn_history.append(self.angleToTurn)
-
-
-        # Why are we doing this when just starting? Don't we ask to stop initially?
-        # self.car.drive.set_speed_angle(self.speed, self.angleToTurn)
-
-        # You guys never told me u needed a gyro T-T
-        self.angvel = self.car.physics.get_angular_velocity()[0]
-
-        self.travel_time = (self.angvel/self.angleToTurn)
-
     def update(self):
         if time.time()-self.start_time >= self.travel_time:
             #self.lidar = self.car.lidar.get_samples()
@@ -175,11 +164,10 @@ class Algorithmic:
             #self.car.drive.set_speed_angle(self.speed, 0)
             self.controller.drive(self.speed, 0)
 
-    def update_slow(self):
-        pass
-
 
 if __name__ == "__main__":
     a = Algorithmic()
-    a.car.set_start_update(a.start, a.update, update_slow=a.update_slow)
-    a.car.go()
+
+    # Introduce rate limiting? lol
+    while True:
+        a.update()
