@@ -12,10 +12,8 @@ class Controller :
    def __init__(self):
       # We need to actually fill these values for real
       print("controller starting")
-      self.front_left = Motor(0, 0, 0)
-      self.front_right = Motor(0, 0, 0)
-      self.back_left = Motor(0, 0, 0)
-      self.back_right = Motor(0, 0, 0)
+      self.left = Motor(0, 0, 0)
+      self.right = Motor(0, 0, 0)
 
 
    '''
@@ -32,14 +30,12 @@ class Controller :
       angle = -self.clamp(angle, -90, 90)
       
       # First index is left speed, Second index is right speed
-      speeds = self.calculateArcadeSpeeds(power, angle)
+      left_speed, right_speed = self.calculateArcadeSpeeds(power, angle)
       
-      # The left and right motors will have the same speeds
-      self.front_left.drive(speeds[0])
-      self.back_left.drive(speeds[0])
-
-      self.front_right.drive(speeds[1])
-      self.back_right.drive(speeds[1])
+      # Setting speed of motors
+      self.left.drive(left_speed)
+      self.right.drive(right_speed)
+     
 
    def stop(self):
       self.drive(0, 0)
