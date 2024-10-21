@@ -20,6 +20,8 @@ class Algorithmic:
         self.lidar_sensor = Lidar_Sensor()
         self.speed = 0.5
 
+        self.start_time = 0
+
         self.turn_history = [0] # determine next turn based on similarity to previous turns to prevent issues with committing to turns.
 
     def highlight(self, distance):
@@ -127,7 +129,7 @@ class Algorithmic:
         self.controller.stop()
         
 
-        self.start = time.time() # defined in start() to remain unchanged by update() resets.
+        self.start_time = time.time() # defined in start() to remain unchanged by update() resets.
 
         #self.lidar = self.car.lidar.get_samples()
         self.lidar = self.lidar_sensor.get_samples()
@@ -140,7 +142,6 @@ class Algorithmic:
 
         # Why are we doing this when just starting? Don't we ask to stop initially?
         # self.car.drive.set_speed_angle(self.speed, self.angleToTurn)
-        # self.controller.drive(self.speed, self.angleToTurn)
 
         # You guys never told me u needed a gyro T-T
         self.angvel = self.car.physics.get_angular_velocity()[0]
@@ -148,7 +149,7 @@ class Algorithmic:
         self.travel_time = (self.angvel/self.angleToTurn)
 
     def update(self):
-        if time.time()-self.start >= self.travel_time:
+        if time.time()-self.start_time >= self.travel_time:
             #self.lidar = self.car.lidar.get_samples()
             self.lidar = self.lidar_sensor.get_samples()
 
@@ -164,8 +165,7 @@ class Algorithmic:
                 self.travel_time = 0
 
 
-            # wut
-            self.start = time.time() # defined in start() to remain unchanged by update() resets.
+            self.start_time = time.time() # defined in start() to remain unchanged by update() resets.
             
             
             #self.car.drive.set_speed_angle(self.speed, self.angleToTurn)
