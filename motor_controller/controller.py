@@ -3,17 +3,14 @@ import math
 from motor import Motor
 
 
-
-
-
 class Controller :
    
    
    def __init__(self):
       # We need to actually fill these values for real
       print("controller starting")
-      self.left = Motor(0, 0, 0)
-      self.right = Motor(0, 0, 0)
+      self.left = Motor(7, 1, 12)
+      self.right = Motor(5, 6, 13)
 
 
    '''
