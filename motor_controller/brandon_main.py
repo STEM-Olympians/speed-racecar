@@ -16,10 +16,10 @@ from lidar_sensor import Lidar_Sensor
 class Algorithmic:
     def __init__(self):
         #self.car = create_racecar()
-        self.controller = Controller()
-        self.controller.stop()
-        self.lidar_sensor = Lidar_Sensor()
-        self.speed = 0.5
+        # self.controller = Controller()
+        # self.controller.stop()
+        # self.lidar_sensor = Lidar_Sensor()
+        # self.speed = 0.5
 
         self.turn_history = [0] # determine next turn based on similarity to previous turns to prevent issues with committing to turns.
 
@@ -51,7 +51,7 @@ class Algorithmic:
     #         return distance
     #     return 0
 
-    def getHighestSummedWindowIndex(self, lidar):
+    def getHighestSummedWindow(self, lidar):
         avg = np.average(lidar[:, 1])
         dev = np.std(lidar[:, 1])
 
@@ -66,6 +66,7 @@ class Algorithmic:
 
         print(range)
         highlighted_range = np.where(range > avg + (0.7*dev), range, 0)
+        highlighted_range = np.concatenate([[0.0], highlighted_range, [0.0]])
         # highlighted_range = np.where(range[1:-1] > avg + (0.7*dev), range[1:-1], 0)
 
         print("highlight")
@@ -81,6 +82,8 @@ class Algorithmic:
         zero_left_neighbor_indices = np.where(left_neighbors_are_zero)[0]
         zero_right_neighbor_indices = np.where(right_neighbors_are_zero)[0]
 
+        print("left zero", zero_left_neighbor_indices)
+        print("right zero", zero_right_neighbor_indices)
         zipped = np.c_[zero_left_neighbor_indices, zero_right_neighbor_indices]
         
 
@@ -100,13 +103,26 @@ class Algorithmic:
         print("high diff, no cap")
         print(highest_diff_index)
 
-        print(left_neighbors_are_zero)
+        # print(left_neighbors_are_zero)
 
+        # Zero left neighbor
+        print("Zero left neighbor", zero_left_neighbor_indices)
+        # Zero right neighbor
+        print("Zero right neighbor", zero_right_neighbor_indices)
+
+
+        # Subtract 1 bc we shifted one index to the right earlier when we added a zero at the front lol
         start_index = zero_left_neighbor_indices[highest_diff_index]
         end_index = zero_right_neighbor_indices[highest_diff_index]
+        print("start", start_index )
+        print("end", end_index )
+        print("result", lidar[start_index: end_index])
+        print("theoretically better end :(", end_index + 1)
+        print("Result...better?", lidar[start_index: end_index + 1])
+        return lidar[start_index: end_index + 1]
     
-        print("how long is this range?")
-        print(len(highlighted_range))
+        # print("how long is this range?")
+        # print(len(printed_range))
         return start_index, end_index
 
         lidar[lower_zero_index: higher_zero_index]
@@ -185,7 +201,7 @@ class Algorithmic:
         #print("SIZE SECOND ", len(second))
         print("lidar arr")
         print(lidar_array)
-        first, second = self.getHighestSummedWindowIndex(lidar_array)
+        highlighted_section = self.getHighestSummedWindow(lidar_array)
         """
         if not sliced:
             idx = lidar
@@ -194,24 +210,29 @@ class Algorithmic:
         #print("SLICED ", sliced)
 
         #idx = np.argmax(sliced)
-        print("funny")
-        print("first", first)
-        print("second", second)
-        highlighted_section = lidar_array[first:second]
+        # print("funny")
+        # print("first", first)
+        # print("second", second)
+        
         range_arr = highlighted_section[:, 1]
         angle_arr = highlighted_section[:, 0]
-        print(range)
+
+
+        
 
         max_range_index = np.argmax(range_arr)
 
         angle = angle_arr[max_range_index]
         print("angle arr")
         print(angle_arr)
+
+        print("range arr")
+        print(range_arr)
+
         print("angle")
         print(angle)
         print("index of max range ", max_range_index)
-        print("FIRST ", first)
-        print("SECOND ", second)
+       
 
         # distance = lidar_array[max_range_index][1]
 

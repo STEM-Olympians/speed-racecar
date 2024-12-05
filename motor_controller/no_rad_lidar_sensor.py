@@ -13,7 +13,7 @@ class Lidar_Sensor:
         RMAX = 32.0
 
         # 90 because belle set it approximately 90 degrees, but it overshot a bit, so reduced by 5
-        self.offset_degrees = 90 - 5 + 45 
+        self.offset_degrees = 90 - 5 
 
 
         # ports = ydlidar.lidarPortList()
@@ -62,16 +62,14 @@ class Lidar_Sensor:
     def offset(self, angle_radian):
             angle_degrees = np.degrees(angle_radian)
 
-            # # Shifting to offset the lidar's heading
-            # angle_degrees += self.offset_degrees
+            # Shifting to offset the lidar's heading
+            angle_degrees = self.offset_degrees + angle_degrees
 
             # Truncating to 3 decimal places
             angle_degrees = np.trunc( angle_degrees * 1000) / 1000
             
             # Ensuring there are no negative angles (makes it easier to decipher later)
             return angle_degrees if angle_degrees > 0 else angle_degrees + 360 
-    
-    
 
     
     def normalize(self, angle_arr, range_arr):
